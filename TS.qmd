@@ -1,7 +1,7 @@
 ---
-title: "Analyse des cas COVID-19 au Sénégal"
-author: "Votre Nom"
-format: html
+title: "Projet Series Temporelles M1-SID 2023-2024"
+author: "Abdoulaye SALL"
+format: pdf
 editor: visual
 ---
 
@@ -22,6 +22,10 @@ data <- read.csv("base_covid19.csv", header=TRUE, sep=";")
 
 # Création de la série temporelle
 cas_ts <- ts(data$CasPositif, frequency=7)
+
+# Visualisation de la serie
+
+plot(cas_ts)
 ```
 
 ## Décomposition et analyse de la tendance
@@ -98,6 +102,12 @@ print("Test ADF sur série différenciée :")
 print(adf_test_diff)
 ```
 
+#### Interprétation
+
+-   Sur la série originale, p-value = 0.97 \> 0.05, série non stationnaire
+
+-   Sur la série différenciée, p-value = 0.01 \< 0.05, série stationnaire
+
 ### Analyse ACF et PACF
 
 ```{r}
@@ -121,9 +131,23 @@ modele_auto <- auto.arima(cas_diff, seasonal=TRUE)
 summary(modele_auto)
 ```
 
+#### Interprétation
+
+Le modèle ARIMA sélectionné automatiquement est **ARIMA(0,0,1)(1,0,1)\[7\]** avec zéro moyenne. Cela signifie :
+
+-   p=0 p = 0 p=0 : pas de termes autoregressifs.
+
+-   d=0 d = 0 d=0 : pas de différenciation.
+
+-   q=1 q = 1 q=1 : un terme de moyenne mobile.
+
+-   Une composante saisonnière avec P=1P = 1P=1, Q=1Q = 1Q=1 et une fréquence de 7 (hebdomadaire).
+
+Les coefficients du modèle montrent des relations significatives, et l'erreur quadratique moyenne (RMSE) est de **30.91** sur l'ensemble d'entraînement.
+
 ## Prévisions
 
-### Prévisions ARIMA
+### Prévisions ARIMA sur 30 jours
 
 ```{r}
 #| fig.width: 10
@@ -135,7 +159,18 @@ plot(prev_arima, main="Prévisions ARIMA sur 30 jours",
      xlab="Temps", ylab="Nombre de cas positifs")
 ```
 
-### Prévisions ETS et comparaison
+#### Interprétation
+
+Les prévisions ARIMA montrent l'évolution des cas positifs sur les 30 jours suivants, avec des bandes de confiance. Ces bandes deviennent plus larges au fil du temps, indiquant une incertitude croissante dans les prévisions à mesure que l'horizon de prévision s'allonge.
+
+```{r}
+
+
+
+
+```
+
+### Prévisions par LISSAGE EXPONENTIEL ETS (Error, Trend, Seasonality) sur 30 jours
 
 ```{r}
 #| fig.width: 10
@@ -166,6 +201,12 @@ ggplot(df_long, aes(x = Date, y = Prevision, color = Methode)) +
     theme_minimal()
 ```
 
+#### Interprétation
+
+-   Le modèle ETS, qui prend en compte les composantes d'erreur, de tendance et de saisonnalité, fournit également des prévisions sur 30 jours. Il est souvent plus flexible pour des données saisonnières ou avec une tendance non linéaire.
+
+-   La comparaison graphique des prévisions ARIMA et ETS montre des différences potentielles dans la manière dont les deux modèles anticipent l'évolution des cas. Il est important de noter que chaque modèle peut mieux capturer certains aspects des données (ARIMA pour la dynamique temporelle autoregressive et ETS pour la détection des tendances/saisons complexes).
+
 ### Évaluation de la précision des modèles
 
 ```{r}
@@ -175,3 +216,9 @@ accuracy(prev_arima)
 print("Précision du modèle ETS :")
 accuracy(prev_ets)
 ```
+
+#### Interprétation
+
+-   **ARIMA** : Le RMSE est de **30.91** et le MAE de **20.50**. Cela signifie que le modèle ARIMA a une erreur moyenne relativement faible.
+
+-   **ETS** : Le RMSE est de **31.35** et le MAE de **21.72**. Légèrement plus élevé que celui du modèle ARIMA, indiquant que le modèle ETS est un peu moins précis que l'ARIMA pour cette série temporelle spécifique.

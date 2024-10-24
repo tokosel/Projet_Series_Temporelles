@@ -9,6 +9,7 @@ data <- read.csv("C:/Users/hp/Desktop/Master SID/Series temporelles/projet/base_
 # Création de la série temporelle avec fréquence hebdomadaire
 cas_ts <- ts(data$CasPositif, frequency=7)
 
+
 # 2. DÉCOMPOSITION ET ANALYSE DE LA TENDANCE
 # Décomposition de la série en composantes (tendance, saisonnalité, résidus)
 decomposition <- stl(cas_ts, s.window="periodic")
@@ -65,7 +66,7 @@ plot(prev_arima, main="Prévisions ARIMA sur 30 jours",
      xlab="Temps", ylab="Nombre de cas positifs")
 
 
-# 5. PRÉVISION PAR LISSAGE EXPONENTIEL ET COMPARAISON
+# 5. PRÉVISION PAR LISSAGE EXPONENTIEL ETS (Error, Trend, Seasonality)
 
 # Modèle de lissage exponentiel
 modele_ets <- ets(cas_ts)

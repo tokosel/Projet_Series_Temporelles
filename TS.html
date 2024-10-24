@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Votre Nom">
+<meta name="author" content="Abdoulaye_SALL">
 
-<title>Analyse des cas COVID-19 au Sénégal</title>
+<title>Projet Series Temporelles M1-SID 2023-2024</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -80,7 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Analyse des cas COVID-19 au Sénégal</h1>
+<h1 class="title">Projet Series Temporelles M1-SID 2023-2024</h1>
 </div>
 
 
@@ -90,7 +90,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Votre Nom </p>
+             <p>Abdoulaye_SALL </p>
           </div>
   </div>
     
@@ -243,6 +243,13 @@ Dickey-Fuller = -9.0383, Lag order = 7, p-value = 0.01
 alternative hypothesis: stationary</code></pre>
 </div>
 </div>
+<section id="interprétation-3" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-3">Interprétation</h4>
+<ul>
+<li><p>Sur la série originale, p-value = 0.97 &gt; 0.05, série non stationnaire</p></li>
+<li><p>Sur la série différenciée, p-value = 0.01 &lt; 0.05, série stationnaire</p></li>
+</ul>
+</section>
 </section>
 <section id="analyse-acf-et-pacf" class="level3">
 <h3 class="anchored" data-anchor-id="analyse-acf-et-pacf">Analyse ACF et PACF</h3>
@@ -259,8 +266,8 @@ alternative hypothesis: stationary</code></pre>
 </div>
 </div>
 </div>
-<section id="interprétation-3" class="level4">
-<h4 class="anchored" data-anchor-id="interprétation-3">Interprétation</h4>
+<section id="interprétation-4" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-4">Interprétation</h4>
 <p>Les fonctions d’autocorrélation (ACF) et d’autocorrélation partielle (PACF) permettent de déterminer les paramètres ppp et qqq du modèle ARIMA. Elles montrent les corrélations des données avec elles-mêmes à différents lags (décalages), aidant à comprendre si la série suit un modèle autoregressif (AR) ou un modèle de moyenne mobile (MA)</p>
 </section>
 </section>
@@ -286,12 +293,23 @@ Training set error measures:
 Training set -0.05961689 30.90945 20.50475 NaN  Inf 0.6203363 -0.006537767</code></pre>
 </div>
 </div>
+<section id="interprétation-5" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-5">Interprétation</h4>
+<p>Le modèle ARIMA sélectionné automatiquement est <strong>ARIMA(0,0,1)(1,0,1)[7]</strong> avec zéro moyenne. Cela signifie :</p>
+<ul>
+<li><p>p=0 p = 0 p=0 : pas de termes autoregressifs.</p></li>
+<li><p>d=0 d = 0 d=0 : pas de différenciation.</p></li>
+<li><p>q=1 q = 1 q=1 : un terme de moyenne mobile.</p></li>
+<li><p>Une composante saisonnière avec P=1P = 1P=1, Q=1Q = 1Q=1 et une fréquence de 7 (hebdomadaire).</p></li>
+</ul>
+<p>Les coefficients du modèle montrent des relations significatives, et l’erreur quadratique moyenne (RMSE) est de <strong>30.91</strong> sur l’ensemble d’entraînement.</p>
+</section>
 </section>
 </section>
 <section id="prévisions" class="level2">
 <h2 class="anchored" data-anchor-id="prévisions">Prévisions</h2>
-<section id="prévisions-arima" class="level3">
-<h3 class="anchored" data-anchor-id="prévisions-arima">Prévisions ARIMA</h3>
+<section id="prévisions-arima-sur-30-jours" class="level3">
+<h3 class="anchored" data-anchor-id="prévisions-arima-sur-30-jours">Prévisions ARIMA sur 30 jours</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prévisions ARIMA</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>prev_arima <span class="ot">&lt;-</span> <span class="fu">forecast</span>(modele_auto, <span class="at">h=</span><span class="dv">30</span>)</span>
@@ -305,9 +323,13 @@ Training set -0.05961689 30.90945 20.50475 NaN  Inf 0.6203363 -0.006537767</code
 </div>
 </div>
 </div>
+<section id="interprétation-6" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-6">Interprétation</h4>
+<p>Les prévisions ARIMA montrent l’évolution des cas positifs sur les 30 jours suivants, avec des bandes de confiance. Ces bandes deviennent plus larges au fil du temps, indiquant une incertitude croissante dans les prévisions à mesure que l’horizon de prévision s’allonge.</p>
 </section>
-<section id="prévisions-ets-et-comparaison" class="level3">
-<h3 class="anchored" data-anchor-id="prévisions-ets-et-comparaison">Prévisions ETS et comparaison</h3>
+</section>
+<section id="prévisions-par-lissage-exponentiel-ets-error-trend-seasonality-sur-30-jours" class="level3">
+<h3 class="anchored" data-anchor-id="prévisions-par-lissage-exponentiel-ets-error-trend-seasonality-sur-30-jours">Prévisions par LISSAGE EXPONENTIEL ETS (Error, Trend, Seasonality) sur 30 jours</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Modèle ETS</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>modele_ets <span class="ot">&lt;-</span> <span class="fu">ets</span>(cas_ts)</span>
@@ -340,6 +362,13 @@ Training set -0.05961689 30.90945 20.50475 NaN  Inf 0.6203363 -0.006537767</code
 </div>
 </div>
 </div>
+<section id="interprétation-7" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-7">Interprétation</h4>
+<ul>
+<li><p>Le modèle ETS, qui prend en compte les composantes d’erreur, de tendance et de saisonnalité, fournit également des prévisions sur 30 jours. Il est souvent plus flexible pour des données saisonnières ou avec une tendance non linéaire.</p></li>
+<li><p>La comparaison graphique des prévisions ARIMA et ETS montre des différences potentielles dans la manière dont les deux modèles anticipent l’évolution des cas. Il est important de noter que chaque modèle peut mieux capturer certains aspects des données (ARIMA pour la dynamique temporelle autoregressive et ETS pour la détection des tendances/saisons complexes).</p></li>
+</ul>
+</section>
 </section>
 <section id="évaluation-de-la-précision-des-modèles" class="level3">
 <h3 class="anchored" data-anchor-id="évaluation-de-la-précision-des-modèles">Évaluation de la précision des modèles</h3>
@@ -363,6 +392,13 @@ Training set -0.05961689 30.90945 20.50475 NaN  Inf 0.6203363 -0.006537767</code
 Training set 0.2317715 31.35175 21.72128 NaN  Inf 0.8129221 0.03148064</code></pre>
 </div>
 </div>
+<section id="interprétation-8" class="level4">
+<h4 class="anchored" data-anchor-id="interprétation-8">Interprétation</h4>
+<ul>
+<li><p><strong>ARIMA</strong> : Le RMSE est de <strong>30.91</strong> et le MAE de <strong>20.50</strong>. Cela signifie que le modèle ARIMA a une erreur moyenne relativement faible.</p></li>
+<li><p><strong>ETS</strong> : Le RMSE est de <strong>31.35</strong> et le MAE de <strong>21.72</strong>. Légèrement plus élevé que celui du modèle ARIMA, indiquant que le modèle ETS est un peu moins précis que l’ARIMA pour cette série temporelle spécifique.</p></li>
+</ul>
+</section>
 </section>
 </section>
 

@@ -4,9 +4,8 @@ library(ggplot2)
 library(tseries)
 library(tidyr)
 
-data <- read.csv("C:/Users/hp/Desktop/Master SID/Series temporelles/projet/base_covid19.csv", header=TRUE, sep=";")
 # 1. IMPORT ET PRÉPARATION DES DONNÉES
-data <- read.csv("base_covid19.csv", header=TRUE, sep=";")
+data <- read.csv("C:/Users/hp/Desktop/Master SID/Series temporelles/projet/base_covid19.csv", header=TRUE, sep=";")
 # Création de la série temporelle avec fréquence hebdomadaire
 cas_ts <- ts(data$CasPositif, frequency=7)
 

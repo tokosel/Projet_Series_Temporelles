@@ -8,7 +8,6 @@ library(tseries)
 
 # Étape 1 : Importation et visualisation des données
 data <- read.csv("C:/Users/hp/Desktop/Master SID/Series temporelles/projet/base_covid19.csv", header=TRUE, sep=";")
-data$date <- as.Date(data$date, format="%d/%m/%Y")
 
 is.ts(data)
 
@@ -31,15 +30,7 @@ plot(decompo_stl)
 window_size <- 7
 
 # Calcul de la moyenne mobile
-moving_avg <- stats::filter(data$CasPositif, rep(1/window_size, window_size), sides=2)
-
-# Affichez les résultats
-plot(data$date, data$CasPositif, type="l", col="blue", xlab="Date", ylab="Nombre de cas positifs", main="Cas Positifs avec Moyenne Mobile")
-lines(data$date, moving_avg, col="red", lwd=2)
-
-
-# Ajout de la légende pour indiquer les courbes
-legend("topright", legend=c("Données originales", "Moyenne mobile"), col=c("blue", "red"), lty=1, lwd=2)
+moving_avg <-filter(data$CasPositif, rep(1/window_size, window_size), sides=2)
 
 # Etape 2 : Modélisation
 

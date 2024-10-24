@@ -1,0 +1,177 @@
+---
+title: "Analyse des cas COVID-19 au Sénégal"
+author: "Votre Nom"
+format: html
+editor: visual
+---
+
+## Importation et préparation des données
+
+```{r}
+#| warning: false
+#| message: false
+
+# Import des packages nécessaires
+library(forecast)
+library(ggplot2)
+library(tseries)
+library(tidyr)
+
+# Import des données
+data <- read.csv("base_covid19.csv", header=TRUE, sep=";")
+
+# Création de la série temporelle
+cas_ts <- ts(data$CasPositif, frequency=7)
+```
+
+## Décomposition et analyse de la tendance
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+
+# Décomposition STL
+decomposition <- stl(cas_ts, s.window="periodic")
+plot(decomposition)
+```
+
+#### Interprétation
+
+La décomposition STL de la série temporelle permet d'analyser trois composantes principales :
+
+-   **Tendance** : La tendance représente la direction générale de l'évolution des cas positifs. Elle montre une montée et une baisse au fil du temps, permettant d'identifier les phases critiques de la pandémie.
+
+-   **Saisonnalité** : La saisonnalité détecte des fluctuations répétitives hebdomadaires, probablement liées à des variations des tests effectués selon les jours de la semaine (moins de tests le week-end, par exemple).
+
+-   **Résidus** : Les résidus représentent les variations non expliquées par la tendance et la saisonnalité. Ils devraient idéalement être aléatoires (bruit blanc), mais des résidus importants peuvent indiquer des événements imprévus ou des changements de comportement non capturés par les autres composantes.
+
+### Moyenne mobile et tendance linéaire
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+
+# Calcul de la moyenne mobile
+mm_7 <- ma(cas_ts, order=7)
+
+# Visualisation avec moyenne mobile
+plot(cas_ts, main="Cas Positifs avec Moyenne Mobile", 
+     ylab="Nombre de cas", xlab="Temps")
+lines(mm_7, col="red", lwd=2)
+
+# Ajout de la tendance linéaire
+temps <- 1:length(cas_ts)
+modele_lineaire <- lm(as.vector(cas_ts) ~ temps)
+lines(temps, predict(modele_lineaire), col="blue", lwd=2)
+legend("topleft", legend=c("Données brutes", "Moyenne mobile", "Tendance linéaire"), 
+       col=c("black", "red", "blue"), lty=1)
+```
+
+#### **Interprétation**
+
+La courbe de la moyenne mobile sur 7 jours lisse les fluctuations quotidiennes et montre une tendance plus claire. Elle permet d'observer l'évolution générale des cas positifs sans être perturbé par les variations brusques quotidiennes. On voit ici que, malgré les fluctuations journalières, la tendance générale peut être identifiée à travers cette moyenne mobile.
+
+### Résumé du modèle linéaire
+
+```{r}
+summary(modele_lineaire)
+```
+
+#### Interprétation
+
+Le modèle linéaire ajouté à la série montre une approximation globale de la tendance des cas positifs. Ce modèle est une simplification et peut ne pas capturer les détails des variations saisonnières ou des résidus, mais il donne une idée générale de la montée ou de la descente des cas sur l'ensemble de la période.
+
+## Modélisation Box-Jenkins
+
+### Tests de stationnarité
+
+```{r}
+# Test sur série originale
+adf_test <- adf.test(cas_ts)
+print("Test ADF sur série originale :")
+print(adf_test)
+
+# Test sur série différenciée
+cas_diff <- diff(cas_ts)
+adf_test_diff <- adf.test(cas_diff)
+print("Test ADF sur série différenciée :")
+print(adf_test_diff)
+```
+
+### Analyse ACF et PACF
+
+```{r}
+#| fig.width: 10
+#| fig.height: 8
+
+par(mfrow=c(2,1))
+par(mar=c(4,4,2,2))
+acf(cas_diff, main="ACF des différences premières")
+pacf(cas_diff, main="PACF des différences premières")
+```
+
+#### Interprétation
+
+Les fonctions d'autocorrélation (ACF) et d'autocorrélation partielle (PACF) permettent de déterminer les paramètres ppp et qqq du modèle ARIMA. Elles montrent les corrélations des données avec elles-mêmes à différents lags (décalages), aidant à comprendre si la série suit un modèle autoregressif (AR) ou un modèle de moyenne mobile (MA)
+
+### Modélisation ARIMA
+
+```{r}
+modele_auto <- auto.arima(cas_diff, seasonal=TRUE)
+summary(modele_auto)
+```
+
+## Prévisions
+
+### Prévisions ARIMA
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+
+# Prévisions ARIMA
+prev_arima <- forecast(modele_auto, h=30)
+plot(prev_arima, main="Prévisions ARIMA sur 30 jours",
+     xlab="Temps", ylab="Nombre de cas positifs")
+```
+
+### Prévisions ETS et comparaison
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+
+# Modèle ETS
+modele_ets <- ets(cas_ts)
+prev_ets <- forecast(modele_ets, h=30)
+
+# Préparation des données pour la comparaison
+df_comparaison <- data.frame(
+    Date = 1:30,
+    ARIMA = as.numeric(prev_arima$mean),
+    ETS = as.numeric(prev_ets$mean)
+)
+
+df_long <- pivot_longer(df_comparaison, 
+                       cols = c("ARIMA", "ETS"),
+                       names_to = "Methode", 
+                       values_to = "Prevision")
+
+# Visualisation comparative
+ggplot(df_long, aes(x = Date, y = Prevision, color = Methode)) +
+    geom_line() +
+    labs(title = "Comparaison des prévisions ARIMA et ETS",
+         x = "Jours de prévision",
+         y = "Nombre de cas positifs") +
+    theme_minimal()
+```
+
+### Évaluation de la précision des modèles
+
+```{r}
+print("Précision du modèle ARIMA :")
+accuracy(prev_arima)
+
+print("Précision du modèle ETS :")
+accuracy(prev_ets)
+```

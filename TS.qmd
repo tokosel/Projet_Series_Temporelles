@@ -24,8 +24,6 @@ data <- read.csv("base_covid19.csv", header=TRUE, sep=";")
 cas_ts <- ts(data$CasPositif, frequency=7)
 
 # Visualisation de la serie
-#| fig.width: 8
-#| fig.height: 4
 
 plot(cas_ts)
 ```
@@ -33,9 +31,8 @@ plot(cas_ts)
 ## 2. Décomposition et analyse de la tendance
 
 ```{r}
-#| fig.width: 10
-#| fig.height: 6
-
+#| warning: false
+#| message: false
 # Décomposer la série avec une saisonnalité hebdomadaire (fréquenc =7)
 
 decomposition <- stl(cas_ts, s.window="periodic")
@@ -50,13 +47,14 @@ La décomposition STL de la série temporelle permet d'analyser trois composante
 
 -   **Saisonnalité** : La saisonnalité détecte des fluctuations répétitives hebdomadaires, probablement liées à des variations des tests effectués selon les jours de la semaine (moins de tests le week-end, par exemple).
 
--   **Résidus** : Les résidus représentent les variations non expliquées par la tendance et la saisonnalité. Ils devraient idéalement être aléatoires (bruit blanc), mais des résidus importants peuvent indiquer des événements imprévus ou des changements de comportement non capturés par les autres composantes.
+-   **Résidus** : Les résidus représentent les variations non expliquées par la tendance et la saisonnalité. Ils devraient idéalement être aléatoires (bruit blanc), mais des résidus importants peuvent indiquer des événements imprévus ou des changements de comportement non capturés par les autres composantes.\
+    \
 
 ### 3. Moyenne mobile et tendance linéaire
 
 ```{r}
-#| fig.width: 10
-#| fig.height: 6
+#| warning: false
+#| message: false
 
 # Calcul de la moyenne mobile
 mm_7 <- ma(cas_ts, order=7)
@@ -76,13 +74,15 @@ legend("topleft", legend=c("Données brutes", "Moyenne mobile", "Tendance linéa
 
 #### **Interprétation**
 
-La courbe de la moyenne mobile sur 7 jours lisse les fluctuations quotidiennes et montre une tendance plus claire. Elle permet d'observer l'évolution générale des cas positifs sans être perturbé par les variations brusques quotidiennes. On voit ici que, malgré les fluctuations journalières, la tendance générale peut être identifiée à travers cette moyenne mobile.
+La courbe de la moyenne mobile sur 7 jours lisse les fluctuations quotidiennes et montre une tendance plus claire. On voit ici que, malgré les fluctuations journalières, la tendance générale peut être identifiée à travers cette moyenne mobile.
 
 ## 4. Modélisation Box-Jenkins
 
 ### Tests de stationnarité
 
 ```{r}
+#| warning: false
+#| message: false
 # Test sur série originale
 adf_test <- adf.test(cas_ts)
 print("Test ADF sur série originale :")
@@ -104,8 +104,8 @@ print(adf_test_diff)
 ### 5. Analyse ACF et PACF
 
 ```{r}
-#| fig.width: 10
-#| fig.height: 8
+#| warning: false
+#| message: false
 
 par(mfrow=c(2,1))
 par(mar=c(4,4,2,2))
@@ -115,11 +115,16 @@ pacf(cas_diff, main="PACF des différences premières")
 
 #### Interprétation
 
-Les fonctions d'autocorrélation (ACF) et d'autocorrélation partielle (PACF) permettent de déterminer les paramètres ppp et qqq du modèle ARIMA. Elles montrent les corrélations des données avec elles-mêmes à différents lags (décalages), aidant à comprendre si la série suit un modèle autoregressif (AR) ou un modèle de moyenne mobile (MA)
+Les fonctions d'autocorrélation (ACF) et d'autocorrélation partielle (PACF) permettent de déterminer les paramètres ppp et qqq du modèle ARIMA. Elles montrent les corrélations des données avec elles-mêmes à différents lags (décalages), aidant à comprendre si la série suit un modèle autoregressif (AR) ou un modèle de moyenne mobile (MA)\
+\
+
+------------------------------------------------------------------------
 
 ### 6. Modélisation ARIMA
 
 ```{r}
+#| warning: false
+#| message: false
 modele_auto <- auto.arima(cas_diff, seasonal=TRUE)
 summary(modele_auto)
 ```
@@ -128,23 +133,25 @@ summary(modele_auto)
 
 Le modèle ARIMA sélectionné automatiquement est **ARIMA(0,0,1)(1,0,1)\[7\]** avec zéro moyenne. Cela signifie :
 
--   p=0 p = 0 p=0 : pas de termes autoregressifs.
+-   p = 0 p = 0 p = 0 : pas de termes autoregressifs.
 
--   d=0 d = 0 d=0 : pas de différenciation.
+-   d = 0 d = 0 d = 0 : pas de différenciation.
 
--   q=1 q = 1 q=1 : un terme de moyenne mobile.
+-   q = 1 q = 1 q = 1 : un terme de moyenne mobile.
 
 -   Une composante saisonnière avec P=1 P= 1 P= 1, Q= 1 Q =1 Q= 1 et une fréquence de 7 (hebdomadaire).
 
 Les coefficients du modèle montrent des relations significatives, et l'erreur quadratique moyenne (RMSE) est de **30.91** sur l'ensemble d'entraînement.
+
+------------------------------------------------------------------------
 
 ## 7. Prévisions
 
 ### 7.1 Prévisions ARIMA sur 30 jours
 
 ```{r}
-#| fig.width: 10
-#| fig.height: 6
+#| warning: false
+#| message: false
 
 # Prévisions ARIMA
 prev_arima <- forecast(modele_auto, h=30)
@@ -156,11 +163,15 @@ plot(prev_arima, main="Prévisions ARIMA sur 30 jours",
 
 Les prévisions ARIMA montrent l'évolution des cas positifs sur les 30 jours suivants, avec des bandes de confiance. Ces bandes deviennent plus larges au fil du temps, indiquant une incertitude croissante dans les prévisions à mesure que l'horizon de prévision s'allonge.
 
-### 7.2 Prévisions par LISSAGE EXPONENTIEL ETS (Error, Trend, Seasonality) sur 30 jours
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+###  7.2 Prévisions par LISSAGE EXPONENTIEL ETS (Error, Trend, Seasonality) sur 30 jours
 
 ```{r}
-#| fig.width: 10
-#| fig.height: 6
+#| warning: false
+#| message: false
 
 # Modèle ETS
 modele_ets <- ets(cas_ts)
@@ -196,6 +207,8 @@ ggplot(df_long, aes(x = Date, y = Prevision, color = Methode)) +
 ### 8. Évaluation de la précision des modèles
 
 ```{r}
+#| warning: false
+#| message: false
 print("Précision du modèle ARIMA :")
 accuracy(prev_arima)
 

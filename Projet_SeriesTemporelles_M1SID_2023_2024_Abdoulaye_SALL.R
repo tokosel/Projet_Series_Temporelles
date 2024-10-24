@@ -10,16 +10,16 @@ library(tseries)
 data <- read.csv("C:/Users/hp/Desktop/Master SID/Series temporelles/projet/base_covid19.csv", header=TRUE, sep=";")
 data$date <- as.Date(data$date, format="%d/%m/%Y")
 
-
-# Visualisation des cas positifs
-plot(data$date, data$CasPositif, type="l", col="blue", xlab="Date", ylab="Nombre de cas positifs", main="Évolution des cas positifs")
+is.ts(data)
 
 # Etape 1 : Décomposition
 
-# Décomposition de la série temporelle avec STL avec une saisonnalité hebdomadaire (fréquence = 7)
-serie_ts <- ts(data$CasPositif, frequency=7, start=c(2020, 3))
+# Conversion de la serie brute en TS
+serie_ts <- ts(data$CasPositif, frequency=7)
+is.ts(serie_ts)
+length(serie_ts)
 
-# Utilisation de STL pour décomposer la série
+# Décomposition de la série temporelle avec STL avec une saisonnalité hebdomadaire (fréquence = 7)
 decompo_stl <- stl(serie_ts, s.window="periodic")
 
 # Visualisation des composantes
@@ -31,11 +31,12 @@ plot(decompo_stl)
 window_size <- 7
 
 # Calcul de la moyenne mobile
-moving_avg <- filter(data$CasPositif, rep(1/window_size, window_size), sides=2)
+moving_avg <- stats::filter(data$CasPositif, rep(1/window_size, window_size), sides=2)
 
-# Visualisation de la moyenne mobile par rapport aux données originales
+# Affichez les résultats
 plot(data$date, data$CasPositif, type="l", col="blue", xlab="Date", ylab="Nombre de cas positifs", main="Cas Positifs avec Moyenne Mobile")
 lines(data$date, moving_avg, col="red", lwd=2)
+
 
 # Ajout de la légende pour indiquer les courbes
 legend("topright", legend=c("Données originales", "Moyenne mobile"), col=c("blue", "red"), lty=1, lwd=2)

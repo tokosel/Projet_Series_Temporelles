@@ -1,5 +1,5 @@
 ---
-title: "Projet Series Temporelles M1-SID 2023-2024"
+title: "Projet Series Temporelles M1-SID 2023-2024 UADB"
 author: "Abdoulaye SALL Code étudiant 1819037"
 format: pdf
 editor: visual
@@ -33,7 +33,7 @@ plot(cas_ts)
 ```{r}
 #| warning: false
 #| message: false
-# Décomposer la série avec une saisonnalité hebdomadaire (fréquenc =7)
+# Décomposer la série avec une saisonnalité hebdomadaire (fréquence =7)
 
 decomposition <- stl(cas_ts, s.window="periodic")
 plot(decomposition)
@@ -47,9 +47,6 @@ plot(decomposition)
 
 -   **Résidus** : Les résidus représentent les variations non expliquées par la tendance et la saisonnalité. Ils devraient idéalement être aléatoires (bruit blanc), mais des résidus importants peuvent indiquer des événements imprévus ou des changements de comportement non capturés par les autres composantes.\
     \
-    \
-
-    ------------------------------------------------------------------------
 
 ### 3. Moyenne mobile et tendance linéaire
 
@@ -116,10 +113,14 @@ pacf(cas_diff, main="PACF des différences premières")
 
 #### Interprétation
 
-Les fonctions d'autocorrélation (ACF) et d'autocorrélation partielle (PACF) permettent de déterminer les paramètres ppp et qqq du modèle ARIMA. Elles montrent les corrélations des données avec elles-mêmes à différents lags (décalages), aidant à comprendre si la série suit un modèle autoregressif (AR) ou un modèle de moyenne mobile (MA)\
-\
+### 1. ACF (Autocorrelation Function)
 
-------------------------------------------------------------------------
+-   On observe que toutes les valeurs sont proches de zéro, avec quelques barres dépassant légèrement les intervalles de confiance, il n'y a pas de corrélations significatives dans les données différenciées, ce qui est souvent un signe que la série différenciée est **stationnaire**.
+
+### 2. PACF (Partial Autocorrelation Function)
+
+-   Ici, la première barre est significative, tandis que les suivantes sont proches de zéro, à l'intérieur des intervalles de confiance.\
+    \
 
 ### 6. Modélisation ARIMA
 
@@ -143,8 +144,6 @@ Le modèle ARIMA sélectionné automatiquement est **ARIMA(0,0,1)(1,0,1)\[7\]** 
 -   Une composante saisonnière avec P=1 P= 1 P= 1, Q= 1 Q =1 Q= 1 et une fréquence de 7 (hebdomadaire).
 
 Les coefficients du modèle montrent des relations significatives, et l'erreur quadratique moyenne (RMSE) est de **30.91** sur l'ensemble d'entraînement.
-
-------------------------------------------------------------------------
 
 ## 7. Prévisions
 
@@ -211,9 +210,7 @@ ggplot(df_long, aes(x = Date, y = Prevision, color = Methode)) +
 
 ------------------------------------------------------------------------
 
-\
-
-### 8. Évaluation de la précision des modèles
+###  8. Évaluation de la précision des modèles
 
 ```{r}
 #| warning: false

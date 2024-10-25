@@ -1,6 +1,6 @@
 ---
 title: "Projet Series Temporelles M1-SID 2023-2024"
-author: "Abdoulaye SALL"
+author: "Abdoulaye SALL Code étudiant 1819037"
 format: pdf
 editor: visual
 ---
@@ -41,14 +41,15 @@ plot(decomposition)
 
 #### Interprétation
 
-La décomposition STL de la série temporelle permet d'analyser trois composantes principales :
-
 -   **Tendance** : La tendance représente la direction générale de l'évolution des cas positifs. Elle montre une montée et une baisse au fil du temps, permettant d'identifier les phases critiques de la pandémie.
 
 -   **Saisonnalité** : La saisonnalité détecte des fluctuations répétitives hebdomadaires, probablement liées à des variations des tests effectués selon les jours de la semaine (moins de tests le week-end, par exemple).
 
 -   **Résidus** : Les résidus représentent les variations non expliquées par la tendance et la saisonnalité. Ils devraient idéalement être aléatoires (bruit blanc), mais des résidus importants peuvent indiquer des événements imprévus ou des changements de comportement non capturés par les autres composantes.\
     \
+    \
+
+    ------------------------------------------------------------------------
 
 ### 3. Moyenne mobile et tendance linéaire
 
@@ -204,6 +205,14 @@ ggplot(df_long, aes(x = Date, y = Prevision, color = Methode)) +
 
 -   La comparaison graphique des prévisions ARIMA et ETS montre des différences potentielles dans la manière dont les deux modèles anticipent l'évolution des cas. Il est important de noter que chaque modèle peut mieux capturer certains aspects des données (ARIMA pour la dynamique temporelle autoregressive et ETS pour la détection des tendances/saisons complexes).
 
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+\
+
 ### 8. Évaluation de la précision des modèles
 
 ```{r}
@@ -218,6 +227,8 @@ accuracy(prev_ets)
 
 #### Interprétation
 
--   **ARIMA** : Le RMSE est de **30.91** et le MAE de **20.50**. Cela signifie que le modèle ARIMA a une erreur moyenne relativement faible.
+-   **ARIMA** : Le RMSE (Root Mean Square Error) est de **30.91** et le MAE (Mean Absolute Error) de **20.50**. Cela signifie que le modèle ARIMA a une erreur moyenne relativement faible.
 
 -   **ETS** : Le RMSE est de **31.35** et le MAE de **21.72**. Légèrement plus élevé que celui du modèle ARIMA, indiquant que le modèle ETS est un peu moins précis que l'ARIMA pour cette série temporelle spécifique.
+
+-   **Performance Comparée** : Dans l'ensemble, le modèle **ARIMA** semble avoir une meilleure précision que le modèle **ETS** en raison de son RMSE et MAE inférieurs, ce qui suggère qu'il pourrait être préférable pour ces données spécifiques.
